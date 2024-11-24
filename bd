@@ -1,0 +1,56 @@
+-- Criação das tabelas
+CREATE TABLE Hotel (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    endereco VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE Quarto (
+    id SERIAL PRIMARY KEY,
+    numero VARCHAR(50) NOT NULL,
+    tipo VARCHAR(50) NOT NULL,
+    hotel_id INT NOT NULL,
+    FOREIGN KEY (hotel_id) REFERENCES Hotel(id)
+);
+
+CREATE TABLE Hospede (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE Reserva (
+    id SERIAL PRIMARY KEY,
+    data_checkin DATE NOT NULL,
+    data_checkout DATE NOT NULL,
+    quarto_id INT NOT NULL,
+    hospede_id INT NOT NULL,
+    FOREIGN KEY (quarto_id) REFERENCES Quarto(id),
+    FOREIGN KEY (hospede_id) REFERENCES Hospede(id)
+);
+
+CREATE TABLE Log (
+    id SERIAL PRIMARY KEY,
+    acao VARCHAR(50) NOT NULL,
+    tabela VARCHAR(50) NOT NULL,
+    registro_id INT NOT NULL,
+    data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    reserva_id INT,
+    FOREIGN KEY (reserva_id) REFERENCES Reserva(id)
+);
+
+-- Criação do trigger para log de alterações na tabela Reserva
+CREATE OR REPLACE FUNCTION log_reserva_changes()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF TG_OP = 'UPDATE' OR TG_OP = 'DELETE' THEN
+    INSERT INTO Log (acao, tabela, registro_id, data, reserva_id)
+    VALUES (TG_OP, 'Reserva', OLD.id, NOW(), OLD.id);
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER reserva_changes
+AFTER UPDATE OR DELETE ON Reserva
+FOR EACH ROW EXECUTE FUNCTION log_reserva_changes();
