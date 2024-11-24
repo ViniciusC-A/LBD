@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model hospede {
+  id      Int       @id @default(autoincrement())
+  nome    String    @db.VarChar(255)
+  email   String    @db.VarChar(255)
+  reserva reserva[]
+}
+
+model hotel {
+  id       Int      @id @default(autoincrement())
+  nome     String   @db.VarChar(255)
+  endereco String   @db.VarChar(255)
+  quarto   quarto[]
+}
+
+model log {
+  id          Int       @id @default(autoincrement())
+  acao        String    @db.VarChar(50)
+  tabela      String    @db.VarChar(50)
+  registro_id Int
+  data        DateTime? @default(now()) @db.Timestamp(6)
+  reserva_id  Int?
+  reserva     reserva?  @relation(fields: [reserva_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model quarto {
+  id       Int       @id @default(autoincrement())
+  numero   String    @db.VarChar(50)
+  tipo     String    @db.VarChar(50)
+  hotel_id Int
+  hotel    hotel     @relation(fields: [hotel_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reserva  reserva[]
+}
+
+model reserva {
+  id            Int      @id @default(autoincrement())
+  data_checkin  DateTime @db.Date
+  data_checkout DateTime @db.Date
+  quarto_id     Int
+  hospede_id    Int
+  log           log[]
+  hospede       hospede  @relation(fields: [hospede_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  quarto        quarto   @relation(fields: [quarto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
