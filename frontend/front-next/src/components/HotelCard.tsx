@@ -1,10 +1,8 @@
 'use client'
-import Image from "next/image"
 import React from "react"
 
 type Props = {
     source: string,
-    onClick: any,
     data: {
         title: string,
         description: string
@@ -15,11 +13,10 @@ type Props = {
 
 const HotelCard: React.FC<Props> = ({
     source,
-    onClick,
     data
 }) => {
     return (
-        <button onClick={onClick} className="flex flex-row gap-2 hover:ring-4 hover:ring-primary hover:cursor-pointer bg-secondary rounded-md p-4 shadow-sm shadow-gray-400">
+        <div  className="flex flex-row gap-2 hover:ring-4 hover:ring-primary hover:cursor-pointer bg-secondary rounded-md p-4 shadow-sm shadow-gray-400">
             
             <div className="flex flex-col p-2">
               <div className="w-full items-center justify-center flex pb-2">
@@ -37,7 +34,7 @@ const HotelCard: React.FC<Props> = ({
                 <p className="text-text font-medium ">{data.location}</p>
               </div>
             </div>
-        </button>
+        </div>
     )
 }
 
